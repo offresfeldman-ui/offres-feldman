@@ -611,7 +611,7 @@ window.accessDocument = function accessDocument(ref, titre) {
       <h4>Contact</h4>
       <p>3 rue d'Hauteville</p>
       <p>75010 Paris</p>
-      <a href="/cdn-cgi/l/email-protection#45262a2b31242631052320292128242b6824332a2624316b2337"><span class="__cf_email__" data-cfemail="385b57564c595b4c785e5d545c55595615594e575b594c165e4a">[email&#160;protected]</span></a>
+      <a href="mailto:contact@feldman-avocat.fr">contact@feldman-avocat.fr</a>
       <a href="https://www.liquidation-feldman.fr" target="_blank">liquidation-feldman.fr</a>
     </div>
   </div>
@@ -814,7 +814,7 @@ window.accessDocument = function accessDocument(ref, titre) {
         </div>
         <div class="contact-info-item">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg>
-          <div><strong>Email</strong><a href="/cdn-cgi/l/email-protection#4e2d2f2c27202b3a60282b222a232f200e29232f2722602d2123"><span class="__cf_email__" data-cfemail="c6a5a7a4afa8a3b2e8a0a3aaa2aba7a886a1aba7afaae8a5a9ab">[email&#160;protected]</span></a></div>
+          <div><strong>Email</strong><a href="mailto:cabinet.feldman@gmail.com">cabinet.feldman@gmail.com</a></div>
         </div>
         <div class="contact-info-item">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -970,7 +970,7 @@ window.accessDocument = function accessDocument(ref, titre) {
   <span id="toast-msg">Message envoyé. Nous vous recontacterons sous 48h.</span>
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
 // ══════════════════════════════════════════════════════════════
 // DONNÉES INITIALES (chargées depuis localStorage si disponible)
 // ══════════════════════════════════════════════════════════════
@@ -1014,23 +1014,15 @@ function parseCSV(csv){
 }
 
 async function loadFromSheets(){
-  const urls = [
-    SHEETS_CSV_URL,
-    'https://corsproxy.io/?' + encodeURIComponent(SHEETS_CSV_URL),
-  ];
-  for(const url of urls) {
-    try {
-      const res = await fetch(url);
-      if(!res.ok) continue;
-      const csv = await res.text();
-      const parsed = parseCSV(csv);
-      if(parsed.length > 0){
-        offres = parsed;
-        console.log('Sheets chargé:', parsed.length, 'annonces via', url);
-        return true;
-      }
-    } catch(e){ console.warn('Sheets error via', url, e); }
-  }
+  try {
+    const res = await fetch(SHEETS_CSV_URL);
+    const csv = await res.text();
+    const parsed = parseCSV(csv);
+    if(parsed.length > 0){
+      offres = parsed;
+      return true;
+    }
+  } catch(e){ console.warn('Sheets error:', e); }
   return false;
 }
 // ══ ÉTAT ══
@@ -1519,4 +1511,14 @@ emailjs.init('TioikOEWpu0GC1I4C');
       offres = [
         { ref:'LF-TEST-001', titre:'Fonds de commerce de restaurant – Paris 11e', lieu:'PARIS-11E', region:'idf', type:'fonds', secteur:'restauration', deadline:'2026-04-30', date:'2026-02-20', prix:85000, img:'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&q=75', exclusif:false, vues:0 },
         { ref:'LF-TEST-002', titre:'Salon de coiffure – Levallois-Perret', lieu:'LEVALLOIS-PERRET', region:'idf', type:'fonds', secteur:'beaute', deadline:'2026-03-31', date:'2026-02-19', prix:45000, img:'https://images.unsplash.com/photo-1604654894610-df63bc536371?w=600&q=75', exclusif:true, vues:0 },
-        { ref:'L
+        { ref:'LF-TEST-003', titre:'Matériel de BTP – Lot complet', lieu:'FIGEAC', region:'occitanie', type:'materiel', secteur:'btp', deadline:'2026-03-30', date:'2026-02-19', prix:null, img:'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&q=75', exclusif:false, vues:0 }
+      ];
+    }
+  } catch(e) {
+    console.error('Sheets error:', e);
+  }
+  applyFilters();
+})();
+</script>
+</body>
+</html>
