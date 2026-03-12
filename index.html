@@ -1419,6 +1419,10 @@ function gateAction(e, action, ref) {
   if(action === 'contact') {
     if(!window.currentUser) {
       window._pendingAction = { action, ref, titre };
+      if(!window.currentUser) {
+      showAuthModal('register', 'Créez votre compte pour recevoir le dossier complet');
+      return;
+    }
       showAuthModal('register', 'Créez votre compte pour contacter le cabinet');
       return;
     }
