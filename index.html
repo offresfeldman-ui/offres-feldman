@@ -611,7 +611,7 @@ window.accessDocument = function accessDocument(ref, titre) {
       <h4>Contact</h4>
       <p>3 rue d'Hauteville</p>
       <p>75010 Paris</p>
-      <a href="/cdn-cgi/l/email-protection#40232f2e342123340026252c242d212e6d21362f2321346e2632"><span class="__cf_email__" data-cfemail="6d0e0203190c0e192d0b080109000c03400c1b020e0c19430b1f">[email&#160;protected]</span></a>
+      <a href="/cdn-cgi/l/email-protection#45262a2b31242631052320292128242b6824332a2624316b2337"><span class="__cf_email__" data-cfemail="385b57564c595b4c785e5d545c55595615594e575b594c165e4a">[email&#160;protected]</span></a>
       <a href="https://www.liquidation-feldman.fr" target="_blank">liquidation-feldman.fr</a>
     </div>
   </div>
@@ -814,7 +814,7 @@ window.accessDocument = function accessDocument(ref, titre) {
         </div>
         <div class="contact-info-item">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg>
-          <div><strong>Email</strong><a href="/cdn-cgi/l/email-protection#4f2c2e2d26212a3b61292a232b222e210f28222e2623612c2022"><span class="__cf_email__" data-cfemail="680b090a01060d1c460e0d040c050906280f05090104460b0705">[email&#160;protected]</span></a></div>
+          <div><strong>Email</strong><a href="/cdn-cgi/l/email-protection#4e2d2f2c27202b3a60282b222a232f200e29232f2722602d2123"><span class="__cf_email__" data-cfemail="c6a5a7a4afa8a3b2e8a0a3aaa2aba7a886a1aba7afaae8a5a9ab">[email&#160;protected]</span></a></div>
         </div>
         <div class="contact-info-item">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -1014,15 +1014,23 @@ function parseCSV(csv){
 }
 
 async function loadFromSheets(){
-  try {
-    const res = await fetch(SHEETS_CSV_URL);
-    const csv = await res.text();
-    const parsed = parseCSV(csv);
-    if(parsed.length > 0){
-      offres = parsed;
-      return true;
-    }
-  } catch(e){ console.warn('Sheets error:', e); }
+  const urls = [
+    SHEETS_CSV_URL,
+    'https://corsproxy.io/?' + encodeURIComponent(SHEETS_CSV_URL),
+  ];
+  for(const url of urls) {
+    try {
+      const res = await fetch(url);
+      if(!res.ok) continue;
+      const csv = await res.text();
+      const parsed = parseCSV(csv);
+      if(parsed.length > 0){
+        offres = parsed;
+        console.log('Sheets chargé:', parsed.length, 'annonces via', url);
+        return true;
+      }
+    } catch(e){ console.warn('Sheets error via', url, e); }
+  }
   return false;
 }
 // ══ ÉTAT ══
@@ -1426,10 +1434,6 @@ function gateAction(e, action, ref) {
 
   } else if(action === 'dossier') {
     window._pendingAction = { action, ref, titre };
-    if(!window.currentUser) {
-      showAuthModal('register', 'Créez votre compte gratuit pour accéder aux dossiers');
-      return;
-    }
     const FREE_LIMIT = 3;
     let used = JSON.parse(localStorage.getItem('lf_free_dossiers') || '[]');
     if(used.includes(ref) || used.length < FREE_LIMIT) {
@@ -1471,15 +1475,7 @@ function resumePendingAction() {
   window._pendingAction = null;
   setTimeout(() => {
     if(p.action === 'contact') openContactModal(p.ref, p.titre);
-    else if(p.action === 'dossier') {
-      const FREE_LIMIT = 3;
-      let used = JSON.parse(localStorage.getItem('lf_free_dossiers') || '[]');
-      if(used.includes(p.ref) || used.length < FREE_LIMIT) {
-        if(!used.includes(p.ref)) { used.push(p.ref); localStorage.setItem('lf_free_dossiers', JSON.stringify(used)); }
-        const remaining = FREE_LIMIT - used.length;
-        showToast('📁 Dossier ouvert' + (remaining > 0 ? ' — ' + remaining + ' accès gratuit' + (remaining > 1 ? 's' : '') + ' restant' + (remaining > 1 ? 's' : '') : ' — dernier accès gratuit utilisé'));
-      } else { openModal('premium'); }
-    }
+    else if(p.action === 'dossier') startCheckout('monthly');
   }, 300);
 }
 
