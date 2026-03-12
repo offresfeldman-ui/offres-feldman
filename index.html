@@ -611,7 +611,7 @@ window.accessDocument = function accessDocument(ref, titre) {
       <h4>Contact</h4>
       <p>3 rue d'Hauteville</p>
       <p>75010 Paris</p>
-      <a href="mailto:contact@feldman-avocat.fr">contact@feldman-avocat.fr</a>
+      <a href="/cdn-cgi/l/email-protection#c8aba7a6bca9abbc88aeada4aca5a9a6e5a9bea7aba9bce6aeba"><span class="__cf_email__" data-cfemail="096a66677d686a7d496f6c656d64686724687f666a687d276f7b">[email&#160;protected]</span></a>
       <a href="https://www.liquidation-feldman.fr" target="_blank">liquidation-feldman.fr</a>
     </div>
   </div>
@@ -814,7 +814,7 @@ window.accessDocument = function accessDocument(ref, titre) {
         </div>
         <div class="contact-info-item">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg>
-          <div><strong>Email</strong><a href="mailto:cabinet.feldman@gmail.com">cabinet.feldman@gmail.com</a></div>
+          <div><strong>Email</strong><a href="/cdn-cgi/l/email-protection#f49795969d9a9180da9291989099959ab49399959d98da979b99"><span class="__cf_email__" data-cfemail="b2d1d3d0dbdcd7c69cd4d7ded6dfd3dcf2d5dfd3dbde9cd1dddf">[email&#160;protected]</span></a></div>
         </div>
         <div class="contact-info-item">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -970,7 +970,7 @@ window.accessDocument = function accessDocument(ref, titre) {
   <span id="toast-msg">Message envoyé. Nous vous recontacterons sous 48h.</span>
 </div>
 
-<script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
 // ══════════════════════════════════════════════════════════════
 // DONNÉES INITIALES (chargées depuis localStorage si disponible)
 // ══════════════════════════════════════════════════════════════
@@ -1426,6 +1426,10 @@ function gateAction(e, action, ref) {
 
   } else if(action === 'dossier') {
     window._pendingAction = { action, ref, titre };
+    if(!window.currentUser) {
+      showAuthModal('register', 'Créez votre compte gratuit pour accéder aux dossiers');
+      return;
+    }
     const FREE_LIMIT = 3;
     let used = JSON.parse(localStorage.getItem('lf_free_dossiers') || '[]');
     if(used.includes(ref) || used.length < FREE_LIMIT) {
@@ -1467,7 +1471,15 @@ function resumePendingAction() {
   window._pendingAction = null;
   setTimeout(() => {
     if(p.action === 'contact') openContactModal(p.ref, p.titre);
-    else if(p.action === 'dossier') startCheckout('monthly');
+    else if(p.action === 'dossier') {
+      const FREE_LIMIT = 3;
+      let used = JSON.parse(localStorage.getItem('lf_free_dossiers') || '[]');
+      if(used.includes(p.ref) || used.length < FREE_LIMIT) {
+        if(!used.includes(p.ref)) { used.push(p.ref); localStorage.setItem('lf_free_dossiers', JSON.stringify(used)); }
+        const remaining = FREE_LIMIT - used.length;
+        showToast('📁 Dossier ouvert' + (remaining > 0 ? ' — ' + remaining + ' accès gratuit' + (remaining > 1 ? 's' : '') + ' restant' + (remaining > 1 ? 's' : '') : ' — dernier accès gratuit utilisé'));
+      } else { openModal('premium'); }
+    }
   }, 300);
 }
 
@@ -1511,14 +1523,4 @@ emailjs.init('TioikOEWpu0GC1I4C');
       offres = [
         { ref:'LF-TEST-001', titre:'Fonds de commerce de restaurant – Paris 11e', lieu:'PARIS-11E', region:'idf', type:'fonds', secteur:'restauration', deadline:'2026-04-30', date:'2026-02-20', prix:85000, img:'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&q=75', exclusif:false, vues:0 },
         { ref:'LF-TEST-002', titre:'Salon de coiffure – Levallois-Perret', lieu:'LEVALLOIS-PERRET', region:'idf', type:'fonds', secteur:'beaute', deadline:'2026-03-31', date:'2026-02-19', prix:45000, img:'https://images.unsplash.com/photo-1604654894610-df63bc536371?w=600&q=75', exclusif:true, vues:0 },
-        { ref:'LF-TEST-003', titre:'Matériel de BTP – Lot complet', lieu:'FIGEAC', region:'occitanie', type:'materiel', secteur:'btp', deadline:'2026-03-30', date:'2026-02-19', prix:null, img:'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&q=75', exclusif:false, vues:0 }
-      ];
-    }
-  } catch(e) {
-    console.error('Sheets error:', e);
-  }
-  applyFilters();
-})();
-</script>
-</body>
-</html>
+        { ref:'L
