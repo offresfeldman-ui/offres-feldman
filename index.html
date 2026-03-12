@@ -611,7 +611,7 @@ window.accessDocument = function accessDocument(ref, titre) {
       <h4>Contact</h4>
       <p>3 rue d'Hauteville</p>
       <p>75010 Paris</p>
-      <a href="/cdn-cgi/l/email-protection#54373b3a20353720143231383039353a7935223b3735207a3226"><span class="__cf_email__" data-cfemail="73101c1d071210073315161f171e121d5e12051c1012075d1501">[email&#160;protected]</span></a>
+      <a href="/cdn-cgi/l/email-protection#40232f2e342123340026252c242d212e6d21362f2321346e2632"><span class="__cf_email__" data-cfemail="6d0e0203190c0e192d0b080109000c03400c1b020e0c19430b1f">[email&#160;protected]</span></a>
       <a href="https://www.liquidation-feldman.fr" target="_blank">liquidation-feldman.fr</a>
     </div>
   </div>
@@ -814,7 +814,7 @@ window.accessDocument = function accessDocument(ref, titre) {
         </div>
         <div class="contact-info-item">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg>
-          <div><strong>Email</strong><a href="/cdn-cgi/l/email-protection#650604070c0b00114b0300090108040b250208040c094b060a08"><span class="__cf_email__" data-cfemail="482b292a21262d3c662e2d242c252926082f25292124662b2725">[email&#160;protected]</span></a></div>
+          <div><strong>Email</strong><a href="/cdn-cgi/l/email-protection#4f2c2e2d26212a3b61292a232b222e210f28222e2623612c2022"><span class="__cf_email__" data-cfemail="680b090a01060d1c460e0d040c050906280f05090104460b0705">[email&#160;protected]</span></a></div>
         </div>
         <div class="contact-info-item">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -913,7 +913,7 @@ window.accessDocument = function accessDocument(ref, titre) {
       <!-- CONNEXION -->
       <div class="auth-form" id="form-login">
         <div class="fg"><label>Email *</label><input type="email" id="login-email" placeholder="jean@cabinet.fr"></div>
-        <div class="fg"><label>Mot de passe *</label><input type="password" id="login-pwd" placeholder="••••••••" onkeydown="if(event.key==='Enter')window.fbLogin()"></div>
+        <div class="fg"><label>Mot de passe *</label><input type="password" id="login-pwd" placeholder="••••••••" onkeydown="if(event.key==='Enter')-pendingfbLogin()"></div>
         <button class="btn-sub" id="btn-auth-submit" onclick="window.fbLogin()">Se connecter</button>
         <p style="text-align:center;margin-top:12px;font-size:12px;color:var(--grey)">Pas encore de compte ? <a href="#" onclick="switchAuthTab('register');return false;" style="color:var(--forest)">Créer un compte</a></p>
       </div>
@@ -1430,19 +1430,13 @@ function gateAction(e, action, ref) {
       showAuthModal('register', 'Créez votre compte gratuit pour accéder aux dossiers');
       return;
     }
-    openDossier(ref, titre);
-  }
-}
-
-function openDossier(ref, titre) {
-  const FREE_LIMIT = 3;
-  let used = JSON.parse(localStorage.getItem('lf_free_dossiers') || '[]');
-  if(used.includes(ref) || used.length < FREE_LIMIT) {
-    if(!used.includes(ref)) { used.push(ref); localStorage.setItem('lf_free_dossiers', JSON.stringify(used)); }
-    const remaining = FREE_LIMIT - used.length;
-    showToast('📁 Dossier ouvert' + (remaining > 0 ? ' — ' + remaining + ' accès gratuit' + (remaining > 1 ? 's' : '') + ' restant' + (remaining > 1 ? 's' : '') : ' — dernier accès gratuit utilisé'));
-  } else {
-    openModal('premium');
+    const FREE_LIMIT = 3;
+    let used = JSON.parse(localStorage.getItem('lf_free_dossiers') || '[]');
+    if(used.includes(ref) || used.length < FREE_LIMIT) {
+      if(!used.includes(ref)) { used.push(ref); localStorage.setItem('lf_free_dossiers', JSON.stringify(used)); }
+      const remaining = FREE_LIMIT - used.length;
+      showToast('📁 Dossier ouvert' + (remaining > 0 ? ' — ' + remaining + ' accès gratuit' + (remaining > 1 ? 's' : '') + ' restant' + (remaining > 1 ? 's' : '') : ' — dernier accès gratuit utilisé'));
+    } else { openModal('premium'); }
   }
 }
 
@@ -1477,7 +1471,15 @@ function resumePendingAction() {
   window._pendingAction = null;
   setTimeout(() => {
     if(p.action === 'contact') openContactModal(p.ref, p.titre);
-    else if(p.action === 'dossier') openDossier(p.ref, p.titre);
+    else if(p.action === 'dossier') {
+      const FREE_LIMIT = 3;
+      let used = JSON.parse(localStorage.getItem('lf_free_dossiers') || '[]');
+      if(used.includes(p.ref) || used.length < FREE_LIMIT) {
+        if(!used.includes(p.ref)) { used.push(p.ref); localStorage.setItem('lf_free_dossiers', JSON.stringify(used)); }
+        const remaining = FREE_LIMIT - used.length;
+        showToast('📁 Dossier ouvert' + (remaining > 0 ? ' — ' + remaining + ' accès gratuit' + (remaining > 1 ? 's' : '') + ' restant' + (remaining > 1 ? 's' : '') : ' — dernier accès gratuit utilisé'));
+      } else { openModal('premium'); }
+    }
   }, 300);
 }
 
