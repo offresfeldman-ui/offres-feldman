@@ -1425,7 +1425,10 @@ function gateAction(e, action, ref) {
     openContactModal(ref, titre);
 
   } else if(action === 'dossier') {
-    window._pendingAction = { action, ref, titre };
+    window._pendingAction = { action, ref, titre };if(!window.currentUser) {
+      showAuthModal('register', 'Créez votre compte gratuit pour accéder aux dossiers');
+      return;
+    }
     const FREE_LIMIT = 3;
     let used = JSON.parse(localStorage.getItem('lf_free_dossiers') || '[]');
     if(used.includes(ref) || used.length < FREE_LIMIT) {
