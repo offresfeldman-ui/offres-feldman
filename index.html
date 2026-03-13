@@ -373,7 +373,7 @@ window.fbRegister = async function() {
       const el = document.getElementById(id); if(el) el.value='';
     });
     showToast('✓ Compte créé ! Bienvenue '+prenom);
-    resumePendingAction();
+    if(window._pendingPlan){const p=window._pendingPlan;window._pendingPlan=null;startCheckout(p);}else{resumePendingAction();}
   } catch(e) {
     const msgs = {
       'auth/email-already-in-use':'Cet email est déjà utilisé.',
@@ -402,7 +402,7 @@ window.fbLogin = async function() {
       const el = document.getElementById(id); if(el) el.value='';
     });
     showToast('✓ Connecté avec succès');
-    resumePendingAction();
+    if(window._pendingPlan){const p=window._pendingPlan;window._pendingPlan=null;startCheckout(p);}else{resumePendingAction();}
   } catch(e) {
     const msgs = {
       'auth/user-not-found':'Aucun compte avec cet email.',
@@ -505,7 +505,7 @@ window.accessDocument = function accessDocument(ref, titre) {
     <h1>Annonces de vente <em>d'actifs</em><br>& reprises d'entreprises</h1>
     <p>Retrouvez l'ensemble des actifs, fonds de commerce et entreprises disponibles à la cession dans le cadre de procédures collectives gérées par le cabinet de Maître Laurent Feldman.</p><div style="margin-top:14px;background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.35);border-radius:4px;padding:10px 14px;font-size:12px;color:#e8d5a3;line-height:1.6"><strong style="color:#c9a84c">✦ Accès gratuit</strong> — Consultez 3 dossiers complets gratuitement, puis 10€ par dossier ou 100€/an en illimité.</div>
     <div class="hi-stats">
-<div style="background:#fef9ec;border:1px solid #f0d98a;border-radius:4px;padding:10px 14px;font-size:12px;color:#7a6020;margin-bottom:16px">✦ <strong>3 dossiers gratuits</strong> inclus — sans carte bancaire.</div>
+<div style="background:#fef9ec;border:1px solid #f0d98a;border-radius:4px;padding:10px 14px;font-size:12px;color:#7a6020;margin-bottom:16px">✦ <strong>3 dossiers gratuits</strong> inclus — sans inscription ni carte bancaire.</div>
       <div><div class="s-num" id="stat-n">36</div><div class="s-lbl">Offres actives</div></div>
       <div><div class="s-num">12</div><div class="s-lbl">Secteurs</div></div>
       <div><div class="s-num">9</div><div class="s-lbl">Régions</div></div>
@@ -944,7 +944,7 @@ window.accessDocument = function accessDocument(ref, titre) {
     </div>
     <div class="mb">
       <p style="font-size:13px;color:#555;margin-bottom:12px;line-height:1.7">Avec l'accès <strong>Premium</strong>, téléchargez les dossiers complets : mémo de présentation, bilan, NDA pré-signé, contacts directs du mandataire.</p>
-      <div style="background:#fef9ec;border:1px solid #f0d98a;border-radius:4px;padding:10px 14px;font-size:12px;color:#7a6020;margin-bottom:16px">✦ <strong>3 dossiers gratuits</strong> inclus — sans carte bancaire.</div>
+      <div style="background:#fef9ec;border:1px solid #f0d98a;border-radius:4px;padding:10px 14px;font-size:12px;color:#7a6020;margin-bottom:16px">✦ <strong>3 dossiers gratuits</strong> inclus — sans inscription ni carte bancaire.</div>
       <div class="premium-plans">
         <div class="plan">
           <div class="plan-name">A l'unité</div>
@@ -1426,10 +1426,6 @@ function gateAction(e, action, ref) {
 
   } else if(action === 'dossier') {
     window._pendingAction = { action, ref, titre };
-    if(!window.currentUser) {
-      showAuthModal('register', 'Créez votre compte gratuit pour accéder aux dossiers');
-      return;
-    }
     const FREE_LIMIT = 3;
     let used = JSON.parse(localStorage.getItem('lf_free_dossiers') || '[]');
     if(used.includes(ref) || used.length < FREE_LIMIT) {
@@ -1471,35 +1467,7 @@ function resumePendingAction() {
   window._pendingAction = null;
   setTimeout(() => {
     if(p.action === 'contact') openContactModal(p.ref, p.titre);
-    else if(p.action === 'dossier') {
-      const FREE_LIMIT = 3;
-      let used = JSON.parse(localStorage.getItem('lf_free_dossiers') || '[]');
-      if(used.includes(p.ref) || used.length < FREE_LIMIT) {
-        if(!used.includes(p.ref)) { used.push(p.ref); localStorage.setItem('lf_free_dossiers', JSON.stringify(used)); }
-        const remaining = FREE_LIMIT - used.length;
-        emailjs.send('service_hdaiied', 'template_fnj8snk', {
-          prenom: window.currentUser.displayName || '',
-          nom: '',
-          email: window.currentUser.email,
-          telephone: '',
-          annonce: p.titre || p.ref,
-          ref: p.ref,
-          message: 'Demande de dossier complet',
-          to_email: 'offres.feldman@gmail.com'
-        }, 'TioikOEWpu0GC1I4C');
-        emailjs.send('service_hdaiied', 'template_fnj8snk', {
-          annonce: p.titre || p.ref,
-          ref: p.ref,
-          prenom: window.currentUser.displayName ? window.currentUser.displayName.split(' ')[0] : '',
-          nom: window.currentUser.displayName ? window.currentUser.displayName.split(' ').slice(1).join(' ') : '',
-          email: window.currentUser.email,
-          telephone: '',
-          qualite: 'Compte client',
-          message: 'Demande de dossier complet'
-        }, 'TioikOEWpu0GC1I4C');
-        showToast('📁 Dossier ' + p.ref + ' — Vous recevrez le dossier complet par email sous 3 jours ouvrés' + (remaining > 0 ? ' (' + remaining + ' accès gratuit' + (remaining > 1 ? 's' : '') + ' restant' + (remaining > 1 ? 's' : '') + ')' : ''));
-      } else { openModal('premium'); }
-    }
+    else if(p.action === 'dossier') startCheckout('monthly');
   }, 300);
 }
 
