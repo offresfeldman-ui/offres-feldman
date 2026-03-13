@@ -373,7 +373,7 @@ window.fbRegister = async function() {
       const el = document.getElementById(id); if(el) el.value='';
     });
     showToast('✓ Compte créé ! Bienvenue '+prenom);
-    if(window._pendingPlan){const p=window._pendingPlan;window._pendingPlan=null;startCheckout(p);}else{resumePendingAction();}
+    resumePendingAction();
   } catch(e) {
     const msgs = {
       'auth/email-already-in-use':'Cet email est déjà utilisé.',
@@ -402,7 +402,7 @@ window.fbLogin = async function() {
       const el = document.getElementById(id); if(el) el.value='';
     });
     showToast('✓ Connecté avec succès');
-    if(window._pendingPlan){const p=window._pendingPlan;window._pendingPlan=null;startCheckout(p);}else{resumePendingAction();}
+    resumePendingAction();
   } catch(e) {
     const msgs = {
       'auth/user-not-found':'Aucun compte avec cet email.',
