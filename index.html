@@ -1477,6 +1477,16 @@ function resumePendingAction() {
       if(used.includes(p.ref) || used.length < FREE_LIMIT) {
         if(!used.includes(p.ref)) { used.push(p.ref); localStorage.setItem('lf_free_dossiers', JSON.stringify(used)); }
         const remaining = FREE_LIMIT - used.length;
+        emailjs.send('service_hdaiied', 'template_fnj8snk', {
+          prenom: window.currentUser.displayName || '',
+          nom: '',
+          email: window.currentUser.email,
+          telephone: '',
+          annonce: p.titre || p.ref,
+          ref: p.ref,
+          message: 'Demande de dossier complet',
+          to_email: 'offres.feldman@gmail.com'
+        }, 'TioikOEWpu0GC1I4C');
         showToast('📁 Dossier ' + p.ref + ' — Vous recevrez le dossier complet par email sous 3 jours ouvrés' + (remaining > 0 ? ' (' + remaining + ' accès gratuit' + (remaining > 1 ? 's' : '') + ' restant' + (remaining > 1 ? 's' : '') + ')' : ''));
       } else { openModal('premium'); }
     }
