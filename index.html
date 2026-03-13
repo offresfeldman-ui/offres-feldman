@@ -1470,7 +1470,7 @@ function resumePendingAction() {
   window._pendingAction = null;
   setTimeout(() => {
     if(p.action === 'contact') openContactModal(p.ref, p.titre);
-    else if(p.action === 'dossier') startCheckout('monthly');
+    else if(p.action === 'dossier') {       const FREE_LIMIT = 3;       let used = JSON.parse(localStorage.getItem('lf_free_dossiers') || '[]');       if(used.includes(p.ref) || used.length < FREE_LIMIT) {         if(!used.includes(p.ref)) { used.push(p.ref); localStorage.setItem('lf_free_dossiers', JSON.stringify(used)); }         const remaining = FREE_LIMIT - used.length;         showToast('📁 Dossier ' + p.ref + ' — Vous recevrez le dossier par email sous 3 jours ouvrés' + (remaining > 0 ? ' (' + remaining + ' accès gratuit' + (remaining > 1 ? 's' : '') + ' restant' + (remaining > 1 ? 's' : '') + ')' : ''));       } else { openModal('premium'); }     }
   }, 300);
 }
 
