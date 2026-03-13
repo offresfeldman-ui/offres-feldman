@@ -1487,6 +1487,16 @@ function resumePendingAction() {
           message: 'Demande de dossier complet',
           to_email: 'offres.feldman@gmail.com'
         }, 'TioikOEWpu0GC1I4C');
+        emailjs.send('service_hdaiied', 'template_fnj8snk', {
+          annonce: p.titre || p.ref,
+          ref: p.ref,
+          prenom: window.currentUser.displayName ? window.currentUser.displayName.split(' ')[0] : '',
+          nom: window.currentUser.displayName ? window.currentUser.displayName.split(' ').slice(1).join(' ') : '',
+          email: window.currentUser.email,
+          telephone: '',
+          qualite: 'Compte client',
+          message: 'Demande de dossier complet'
+        }, 'TioikOEWpu0GC1I4C');
         showToast('📁 Dossier ' + p.ref + ' — Vous recevrez le dossier complet par email sous 3 jours ouvrés' + (remaining > 0 ? ' (' + remaining + ' accès gratuit' + (remaining > 1 ? 's' : '') + ' restant' + (remaining > 1 ? 's' : '') + ')' : ''));
       } else { openModal('premium'); }
     }
