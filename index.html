@@ -503,9 +503,9 @@ window.accessDocument = function accessDocument(ref, titre) {
       Bourse de cession & reprise
     </div>
     <h1>Annonces de vente <em>d'actifs</em><br>& reprises d'entreprises</h1>
-    <p>Retrouvez l'ensemble des actifs, fonds de commerce et entreprises disponibles à la cession dans le cadre de procédures collectives gérées par le cabinet de Maître Laurent Feldman.</p><div style="margin-top:14px;background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.35);border-radius:4px;padding:10px 14px;font-size:12px;color:#e8d5a3;line-height:1.6"><strong style="color:#c9a84c">✦ Accès gratuit</strong> — Consultez 1 dossier complet gratuitement, puis 10€ par dossier.</div>
+    <p>Retrouvez l'ensemble des actifs, fonds de commerce et entreprises disponibles à la cession dans le cadre de procédures collectives gérées par le cabinet de Maître Laurent Feldman.</p><div style="margin-top:14px;background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.35);border-radius:4px;padding:10px 14px;font-size:12px;color:#e8d5a3;line-height:1.6"><strong style="color:#c9a84c">✦ Accès gratuit</strong> — Consultez 3 dossiers complets gratuitement, puis 10€ par dossier ou 100€/an en illimité.</div>
     <div class="hi-stats">
-<div style="background:#fef9ec;border:1px solid #f0d98a;border-radius:4px;padding:10px 14px;font-size:12px;color:#7a6020;margin-bottom:16px">✦ <strong>1 dossier gratuit</strong> inclus — sans carte bancaire.</div>
+<div style="background:#fef9ec;border:1px solid #f0d98a;border-radius:4px;padding:10px 14px;font-size:12px;color:#7a6020;margin-bottom:16px">✦ <strong>3 dossiers gratuits</strong> inclus — sans inscription ni carte bancaire.</div>
       <div><div class="s-num" id="stat-n">36</div><div class="s-lbl">Offres actives</div></div>
       <div><div class="s-num">12</div><div class="s-lbl">Secteurs</div></div>
       <div><div class="s-num">9</div><div class="s-lbl">Régions</div></div>
@@ -611,7 +611,7 @@ window.accessDocument = function accessDocument(ref, titre) {
       <h4>Contact</h4>
       <p>3 rue d'Hauteville</p>
       <p>75010 Paris</p>
-      <a href="/cdn-cgi/l/email-protection#fa9995948e9b998eba9c9f969e979b94d79b8c95999b8ed49c88"><span class="__cf_email__" data-cfemail="7b1814150f1a180f3b1d1e171f161a15561a0d14181a0f551d09">[email&#160;protected]</span></a>
+      <a href="mailto:contact@feldman-avocat.fr">contact@feldman-avocat.fr</a>
       <a href="https://www.liquidation-feldman.fr" target="_blank">liquidation-feldman.fr</a>
     </div>
   </div>
@@ -814,7 +814,7 @@ window.accessDocument = function accessDocument(ref, titre) {
         </div>
         <div class="contact-info-item">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,12 2,6"/></svg>
-          <div><strong>Email</strong><a href="/cdn-cgi/l/email-protection#d1b2b0b3b8bfb4a5ffb7b4bdb5bcb0bf91b6bcb0b8bdffb2bebc"><span class="__cf_email__" data-cfemail="0a696b6863646f7e246c6f666e676b644a6d676b636624696567">[email&#160;protected]</span></a></div>
+          <div><strong>Email</strong><a href="mailto:cabinet.feldman@gmail.com">cabinet.feldman@gmail.com</a></div>
         </div>
         <div class="contact-info-item">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
@@ -944,7 +944,7 @@ window.accessDocument = function accessDocument(ref, titre) {
     </div>
     <div class="mb">
       <p style="font-size:13px;color:#555;margin-bottom:12px;line-height:1.7">Avec l'accès <strong>Premium</strong>, téléchargez les dossiers complets : mémo de présentation, bilan, NDA pré-signé, contacts directs du mandataire.</p>
-      <div style="background:#fef9ec;border:1px solid #f0d98a;border-radius:4px;padding:10px 14px;font-size:12px;color:#7a6020;margin-bottom:16px">✦ <strong>1 dossier gratuit</strong> inclus — sans carte bancaire.</div>
+      <div style="background:#fef9ec;border:1px solid #f0d98a;border-radius:4px;padding:10px 14px;font-size:12px;color:#7a6020;margin-bottom:16px">✦ <strong>3 dossiers gratuits</strong> inclus — sans inscription ni carte bancaire.</div>
       <div class="premium-plans">
         <div class="plan">
           <div class="plan-name">A l'unité</div>
@@ -970,7 +970,7 @@ window.accessDocument = function accessDocument(ref, titre) {
   <span id="toast-msg">Message envoyé. Nous vous recontacterons sous 48h.</span>
 </div>
 
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script>
 // ══════════════════════════════════════════════════════════════
 // DONNÉES INITIALES (chargées depuis localStorage si disponible)
 // ══════════════════════════════════════════════════════════════
@@ -1072,7 +1072,8 @@ function buildCard(o){
       <div class="card-footer">
         <div>${o.prix?`<div class="card-price">${o.prix}<small> € HT</small></div>`:'<span class="price-nc">Prix non communiqué</span>'}</div>
         <div style="display:flex;gap:6px;flex-wrap:wrap">
-          <button class="btn-dossier" onclick="gateAction(event,'dossier','${o.ref}')">📁 Accéder au dossier</button>
+          <button class="btn-interest" onclick="gateAction(event,'contact','${o.ref}')">M'informer</button>
+          <button class="btn-dossier" onclick="gateAction(event,'dossier','${o.ref}')">📁 Dossier</button>
         </div>
       </div>
     </div>
@@ -1425,26 +1426,13 @@ function gateAction(e, action, ref) {
 
   } else if(action === 'dossier') {
     window._pendingAction = { action, ref, titre };
-    if(!window.currentUser) {
-      showAuthModal('register', 'Créez votre compte pour accéder aux dossiers');
-      return;
-    }
-    const FREE_LIMIT = 1;
+    const FREE_LIMIT = 3;
     let used = JSON.parse(localStorage.getItem('lf_free_dossiers') || '[]');
-    if(!used.includes(ref) && used.length < FREE_LIMIT) {
-      used.push(ref);
-      localStorage.setItem('lf_free_dossiers', JSON.stringify(used));
-      emailjs.send('service_hdaiied', 'template_fnj8snk', {
-        annonce: titre || ref, ref: ref,
-        prenom: window.currentUser.displayName ? window.currentUser.displayName.split(' ')[0] : '',
-        nom: window.currentUser.displayName ? window.currentUser.displayName.split(' ').slice(1).join(' ') : '',
-        email: window.currentUser.email, telephone: '',
-        qualite: 'Compte client', message: 'Demande de dossier complet (accès gratuit)'
-      }, 'TioikOEWpu0GC1I4C');
-      showToast('📁 Dossier ' + ref + ' — Vous recevrez le dossier par email sous 3 jours ouvrés');
-    } else {
-      startCheckout('monthly');
-    }
+    if(used.includes(ref) || used.length < FREE_LIMIT) {
+      if(!used.includes(ref)) { used.push(ref); localStorage.setItem('lf_free_dossiers', JSON.stringify(used)); }
+      const remaining = FREE_LIMIT - used.length;
+      showToast('📁 Dossier ouvert' + (remaining > 0 ? ' — ' + remaining + ' accès gratuit' + (remaining > 1 ? 's' : '') + ' restant' + (remaining > 1 ? 's' : '') : ' — dernier accès gratuit utilisé'));
+    } else { openModal('premium'); }
   }
 }
 
@@ -1479,24 +1467,7 @@ function resumePendingAction() {
   window._pendingAction = null;
   setTimeout(() => {
     if(p.action === 'contact') openContactModal(p.ref, p.titre);
-    else if(p.action === 'dossier') {
-      const FREE_LIMIT = 1;
-      let used = JSON.parse(localStorage.getItem('lf_free_dossiers') || '[]');
-      if(!used.includes(p.ref) && used.length < FREE_LIMIT) {
-        used.push(p.ref);
-        localStorage.setItem('lf_free_dossiers', JSON.stringify(used));
-        emailjs.send('service_hdaiied', 'template_fnj8snk', {
-          annonce: p.titre || p.ref, ref: p.ref,
-          prenom: window.currentUser.displayName ? window.currentUser.displayName.split(' ')[0] : '',
-          nom: window.currentUser.displayName ? window.currentUser.displayName.split(' ').slice(1).join(' ') : '',
-          email: window.currentUser.email, telephone: '',
-          qualite: 'Compte client', message: 'Demande de dossier complet (accès gratuit)'
-        }, 'TioikOEWpu0GC1I4C');
-        showToast('📁 Dossier ' + p.ref + ' — Vous recevrez le dossier par email sous 3 jours ouvrés');
-      } else {
-        startCheckout('monthly');
-      }
-    }
+    else if(p.action === 'dossier') startCheckout('monthly');
   }, 300);
 }
 
@@ -1540,4 +1511,14 @@ emailjs.init('TioikOEWpu0GC1I4C');
       offres = [
         { ref:'LF-TEST-001', titre:'Fonds de commerce de restaurant – Paris 11e', lieu:'PARIS-11E', region:'idf', type:'fonds', secteur:'restauration', deadline:'2026-04-30', date:'2026-02-20', prix:85000, img:'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=600&q=75', exclusif:false, vues:0 },
         { ref:'LF-TEST-002', titre:'Salon de coiffure – Levallois-Perret', lieu:'LEVALLOIS-PERRET', region:'idf', type:'fonds', secteur:'beaute', deadline:'2026-03-31', date:'2026-02-19', prix:45000, img:'https://images.unsplash.com/photo-1604654894610-df63bc536371?w=600&q=75', exclusif:true, vues:0 },
-        { ref:'L
+        { ref:'LF-TEST-003', titre:'Matériel de BTP – Lot complet', lieu:'FIGEAC', region:'occitanie', type:'materiel', secteur:'btp', deadline:'2026-03-30', date:'2026-02-19', prix:null, img:'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=600&q=75', exclusif:false, vues:0 }
+      ];
+    }
+  } catch(e) {
+    console.error('Sheets error:', e);
+  }
+  applyFilters();
+})();
+</script>
+</body>
+</html>
