@@ -1456,13 +1456,8 @@ function showPremiumModal(ref, titre) {
 function choosePlan(plan) {
   closeModal('premium');
   if(!window.currentUser) {
-    window._pendingPlan = plan;
-    showAuthModal('register', 'Créez votre compte pour accéder aux dossiers');
-    return;
-  }
-  startCheckout(plan);
+    startCheckout(plan);
 }
-
 // Reprendre l'action après connexion/inscription réussie
 function resumePendingAction() {
   const p = window._pendingAction;
