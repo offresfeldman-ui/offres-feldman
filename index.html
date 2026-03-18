@@ -1425,6 +1425,10 @@ function gateAction(e, action, ref) {
 
   } else if(action === 'dossier') {
     window._pendingAction = { action, ref, titre };
+    if(!window.currentUser) {
+      showAuthModal('register', 'Créez votre compte pour accéder aux dossiers');
+      return;
+    }
     const FREE_LIMIT = 1;
     let used = JSON.parse(localStorage.getItem('lf_free_dossiers') || '[]');
     if(used.includes(ref) || used.length < FREE_LIMIT) {
