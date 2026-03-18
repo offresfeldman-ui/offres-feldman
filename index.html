@@ -1072,8 +1072,7 @@ function buildCard(o){
       <div class="card-footer">
         <div>${o.prix?`<div class="card-price">${o.prix}<small> € HT</small></div>`:'<span class="price-nc">Prix non communiqué</span>'}</div>
         <div style="display:flex;gap:6px;flex-wrap:wrap">
-          <button class="btn-interest" onclick="gateAction(event,'contact','${o.ref}')">M'informer</button>
-          <button class="btn-dossier" onclick="gateAction(event,'dossier','${o.ref}')">📁 Dossier</button>
+                  <button class="btn-dossier" onclick="gateAction(event,'dossier','${o.ref}')">📁 Accéder au dossier</button>
         </div>
       </div>
     </div>
