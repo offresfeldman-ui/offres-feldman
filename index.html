@@ -1455,8 +1455,7 @@ function showPremiumModal(ref, titre) {
 
 function choosePlan(plan) {
   closeModal('premium');
-  if(!window.currentUser) {
-    startCheckout(plan);}
+  if(!window.currentUser) {startCheckout(plan);}
 // Reprendre l'action après connexion/inscription réussie
 function resumePendingAction() {
   const p = window._pendingAction;
