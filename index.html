@@ -435,7 +435,7 @@ window.accessDocument = function accessDocument(ref, titre) {
       if(!used.includes(ref)) { used.push(ref); localStorage.setItem('lf_free_dossiers', JSON.stringify(used)); }
       const remaining = FREE_LIMIT - used.length;
       showToast('📁 Dossier ouvert' + (remaining > 0 ? ' — ' + remaining + ' accès gratuit' + (remaining > 1 ? 's' : '') + ' restant' + (remaining > 1 ? 's' : '') : ' — dernier accès gratuit utilisé'));
-    } else { openModal('premium'); };
+    } else { startCheckout('monthly'); };
     return;
   }
   showToast('✓ Ouverture du dossier '+ref);
@@ -1471,7 +1471,7 @@ function resumePendingAction() {
   window._pendingAction = null;
   setTimeout(() => {
     if(p.action === 'contact') openContactModal(p.ref, p.titre);
-    else if(p.action === 'dossier') startCheckout('monthly');
+    else if(p.action === 'dossier') {       const FREE_LIMIT = 1;       let used = JSON.parse(localStorage.getItem('lf_free_dossiers') || '[]');       if(!used.includes(p.ref) && used.length < FREE_LIMIT) {         used.push(p.ref);         localStorage.setItem('lf_free_dossiers', JSON.stringify(used));         showToast('📁 Dossier ' + p.ref + ' — Vous recevrez le dossier par email sous 3 jours ouvrés');       } else { startCheckout('monthly'); }     }
   }, 300);
 }
 
