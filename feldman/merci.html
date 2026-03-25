@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Paiement confirmé – Liquidation-Feldman</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --navy: #1a2744;
+      --forest: #2d5016;
+      --gold: #c9a84c;
+      --grey: #6b7280;
+    }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: #f8f7f4;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 40px;
+      text-decoration: none;
+    }
+    .logo-badge {
+      width: 48px; height: 48px;
+      background: var(--navy);
+      color: #fff;
+      border-radius: 4px;
+      display: flex; align-items: center; justify-content: center;
+      font-family: 'Playfair Display', serif;
+      font-size: 20px; font-weight: 700;
+    }
+    .logo-text { line-height: 1.2; }
+    .logo-text strong { display: block; font-size: 15px; color: var(--navy); }
+    .logo-text span { font-size: 11px; color: var(--grey); }
+
+    .card {
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      padding: 48px 40px;
+      max-width: 520px;
+      width: 100%;
+      text-align: center;
+    }
+    .icon {
+      width: 64px; height: 64px;
+      background: #d1fae5;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      margin: 0 auto 24px;
+      font-size: 28px;
+    }
+    h1 {
+      font-family: 'Playfair Display', serif;
+      font-size: 26px;
+      color: var(--navy);
+      margin-bottom: 12px;
+    }
+    .subtitle {
+      font-size: 14px;
+      color: var(--grey);
+      line-height: 1.7;
+      margin-bottom: 32px;
+    }
+    .info-box {
+      background: #f8f7f4;
+      border-radius: 6px;
+      padding: 20px;
+      margin-bottom: 32px;
+      text-align: left;
+    }
+    .info-box p {
+      font-size: 13px;
+      color: var(--grey);
+      margin-bottom: 6px;
+    }
+    .info-box strong {
+      font-size: 14px;
+      color: var(--navy);
+    }
+    .btn {
+      display: inline-block;
+      background: var(--navy);
+      color: #fff;
+      padding: 12px 28px;
+      border-radius: 4px;
+      text-decoration: none;
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: .05em;
+    }
+    .contact {
+      margin-top: 24px;
+      font-size: 12px;
+      color: var(--grey);
+    }
+    .contact a { color: var(--navy); }
+    .sending { color: var(--grey); font-size: 13px; margin-top: 16px; }
+  </style>
+</head>
+<body>
+
+  <a href="https://offres-feldman.fr" class="logo">
+    <div class="logo-badge">LF</div>
+    <div class="logo-text">
+      <strong>Liquidation-Feldman</strong>
+      <span>Maître Laurent Feldman</span>
+    </div>
+  </a>
+
+  <div class="card">
+    <div class="icon">✅</div>
+    <h1>Paiement confirmé</h1>
+    <p class="subtitle">Merci pour votre achat. Le cabinet vous contactera sous 3 jours ouvrés pour vous transmettre le dossier complet.</p>
+
+    <div class="info-box" id="info-box" style="display:none">
+      <p>Dossier demandé</p>
+      <strong id="display-ref">–</strong>
+      <p style="margin-top:12px">Email de contact</p>
+      <strong id="display-email">–</strong>
+    </div>
+
+    <a href="https://offres-feldman.fr" class="btn">← Retour aux offres</a>
+    <p class="contact">Une question ? <a href="/cdn-cgi/l/email-protection#bad5dcdcc8dfc997dcdfd6ded7dbd4faddd7dbd3d694d9d5d7"><span class="__cf_email__" data-cfemail="7d121b1b0f180e501b181119101c133d1a101c1411531e1210">[email&#160;protected]</span></a></p>
+    <p class="sending" id="sending-status"></p>
+  </div>
+
+  <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+    emailjs.init('TioikOEWpu0GC1I4C');
+
+    const params = new URLSearchParams(window.location.search);
+    const ref    = params.get('ref') || '';
+    const email  = params.get('prefilled_email') || params.get('email') || '';
+    const titre  = params.get('titre') || ref;
+    const plan   = params.get('plan') || 'dossier';
+
+    if (ref || email) {
+      document.getElementById('info-box').style.display = 'block';
+      document.getElementById('display-ref').textContent   = titre || ref || 'Non précisé';
+      document.getElementById('display-email').textContent = email || 'Non précisé';
+    }
+
+    // Envoi email de notification au cabinet
+    const status = document.getElementById('sending-status');
+    emailjs.send('service_hdaiied', 'template_fnj8snk', {
+      annonce:   titre || ref || 'Dossier',
+      ref:       ref || 'N/A',
+      prenom:    '',
