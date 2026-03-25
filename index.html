@@ -353,6 +353,7 @@ window.fbRegister = async function() {
   const pwd    = document.getElementById('reg-pwd').value;
   const pwd2   = document.getElementById('reg-pwd2').value;
   const err    = document.getElementById('auth-error');
+  const pendingDossier = getPendingDossierInfo();
   err.style.display = 'none';
 
   if(!prenom||!nom||!email||!pwd){ err.textContent='Tous les champs sont obligatoires.'; err.style.display='block'; return; }
@@ -366,14 +367,28 @@ window.fbRegister = async function() {
     const cred = await auth.createUserWithEmailAndPassword(email, pwd);
     await cred.user.updateProfile({ displayName: prenom+' '+nom });
     await db.collection('users').doc(cred.user.uid).set({
-      prenom, nom, email, premium: false, createdAt: new Date().toISOString()
+      prenom,
+      nom,
+      email,
+      premium: false,
+      createdAt: new Date().toISOString(),
+      dossierRefAtSignup: pendingDossier.ref || null,
+      dossierTitleAtSignup: pendingDossier.titre || null
     });
+
+    const emailOk = await sendRegistrationEmails({
+      prenom,
+      nom,
+      email,
+      dossierRef: pendingDossier.ref,
+      dossierTitre: pendingDossier.titre
+    });
+
     closeModal('auth');
-    // Vider le formulaire
     ['reg-prenom','reg-nom','reg-email','reg-pwd','reg-pwd2'].forEach(id => {
       const el = document.getElementById(id); if(el) el.value='';
     });
-    showToast('✓ Compte créé ! Bienvenue '+prenom);
+    showToast(emailOk ? '✓ Compte créé et email envoyé !' : "✓ Compte créé, mais l'email n'a pas pu être envoyé.");
     resumePendingAction();
   } catch(e) {
     const msgs = {
@@ -424,22 +439,7 @@ window.fbLogout = async function() {
 
 // ── Accès document ──
 window.accessDocument = function accessDocument(ref, titre) {
-  if(!window.currentUser) {
-    openAuthModal('register');
-    return;
-  }
-  if(!window.currentUserData?.premium) {
-    const FREE_LIMIT = 1;
-    let used = JSON.parse(localStorage.getItem('lf_free_dossiers') || '[]');
-    if(used.includes(ref) || used.length < FREE_LIMIT) {
-      if(!used.includes(ref)) { used.push(ref); localStorage.setItem('lf_free_dossiers', JSON.stringify(used)); }
-      const remaining = FREE_LIMIT - used.length;
-      showToast('📁 Dossier ouvert' + (remaining > 0 ? ' — ' + remaining + ' accès gratuit' + (remaining > 1 ? 's' : '') + ' restant' + (remaining > 1 ? 's' : '') : ' — dernier accès gratuit utilisé'));
-    } else { startCheckout('monthly'); };
-    return;
-  }
-  showToast('✓ Ouverture du dossier '+ref);
-  // window.open('https://drive.google.com/votre-lien-'+ref, '_blank');
+  gateAction(null, 'dossier', ref, titre);
 };
 </script>
 
@@ -504,9 +504,9 @@ window.accessDocument = function accessDocument(ref, titre) {
       Bourse de cession & reprise
     </div>
     <h1>Annonces de vente <em>d'actifs</em><br>& reprises d'entreprises</h1>
-    <p>Retrouvez l'ensemble des actifs, fonds de commerce et entreprises disponibles à la cession dans le cadre de procédures collectives gérées par le cabinet de Maître Laurent Feldman.</p><div style="margin-top:14px;background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.35);border-radius:4px;padding:10px 14px;font-size:12px;color:#e8d5a3;line-height:1.6"><strong style="color:#c9a84c">✦ Accès gratuit</strong> — Consultez 3 dossiers complets gratuitement, puis 10€ par dossier ou 100€/an en illimité.</div>
+    <p>Retrouvez l'ensemble des actifs, fonds de commerce et entreprises disponibles à la cession dans le cadre de procédures collectives gérées par le cabinet de Maître Laurent Feldman.</p><div style="margin-top:14px;background:rgba(201,168,76,.15);border:1px solid rgba(201,168,76,.35);border-radius:4px;padding:10px 14px;font-size:12px;color:#e8d5a3;line-height:1.6"><strong style="color:#c9a84c">✦ Création de compte</strong> — Créez votre compte pour demander l'envoi du dossier. Nous vous l'adressons sous 3 jours ouvrés.</div>
     <div class="hi-stats">
-<div style="background:#fef9ec;border:1px solid #f0d98a;border-radius:4px;padding:10px 14px;font-size:12px;color:#7a6020;margin-bottom:16px">✦ <strong>3 dossiers gratuits</strong> inclus — sans inscription ni carte bancaire.</div>
+<div style="background:#fef9ec;border:1px solid #f0d98a;border-radius:4px;padding:10px 14px;font-size:12px;color:#7a6020;margin-bottom:16px">✦ <strong>Création de compte requise</strong> — le dossier demandé vous est envoyé sous 3 jours ouvrés.</div>
       <div><div class="s-num" id="stat-n">36</div><div class="s-lbl">Offres actives</div></div>
       <div><div class="s-num">12</div><div class="s-lbl">Secteurs</div></div>
       <div><div class="s-num">9</div><div class="s-lbl">Régions</div></div>
@@ -935,32 +935,39 @@ window.accessDocument = function accessDocument(ref, titre) {
   </div>
 </div>
 
-<!-- ══ MODAL PREMIUM ══ -->
+<!-- ══ MODAL PAIEMENT DOSSIER ══ -->
 <div class="overlay" id="modal-premium">
   <div class="modal" style="max-width:520px">
     <div class="mh" style="background:linear-gradient(135deg,var(--navy),var(--forest))">
-      <h2>⭐ Accès Premium</h2>
-      <p>Débloquez tous les dossiers de cession</p>
+      <h2>Accès au dossier complet</h2>
+      <p id="premium-ref">Réf. –</p>
       <button class="mclose" onclick="closeModal('premium')">×</button>
     </div>
     <div class="mb">
-      <p style="font-size:13px;color:#555;margin-bottom:12px;line-height:1.7">Avec l'accès <strong>Premium</strong>, téléchargez les dossiers complets : mémo de présentation, bilan, NDA pré-signé, contacts directs du mandataire.</p>
-      <div style="background:#fef9ec;border:1px solid #f0d98a;border-radius:4px;padding:10px 14px;font-size:12px;color:#7a6020;margin-bottom:16px">✦ <strong>3 dossiers gratuits</strong> inclus — sans inscription ni carte bancaire.</div>
-      <div class="premium-plans">
-        <div class="plan">
-          <div class="plan-name">A l'unité</div>
-          <div class="plan-price">10<small>€/dossier</small></div>
-          <div class="plan-features">✓ Tous les dossiers<br>✓ Alertes nouvelles offres<br>✓ Sans engagement</div>
-          <button class="plan-cta" onclick="choosePlan('monthly')">Choisir</button>
-        </div>
-        <div class="plan featured">
-          <div class="plan-name">⭐ Abonnement Annuel</div>
-          <div class="plan-price">100<small>€/an</small></div>
-          <div class="plan-features">✓ Tous les dossiers<br>✓ Alertes nouvelles offres<br>✓ Économisez 149€</div>
-          <button class="plan-cta" onclick="choosePlan('yearly')">Choisir</button>
-        </div>
+      <p id="premium-text" style="font-size:13px;color:#555;margin-bottom:12px;line-height:1.7">À partir du 2ᵉ clic, l'accès au dossier complet est payant.</p>
+      <div style="background:#fef9ec;border:1px solid #f0d98a;border-radius:4px;padding:14px 16px;margin-bottom:16px;text-align:center">
+        <div class="plan-name" style="margin-bottom:6px">Tarif unitaire</div>
+        <div class="plan-price">10<small>€ / dossier</small></div>
+        <div class="plan-features" style="margin:10px 0 0">Le numéro du dossier sera envoyé après paiement.</div>
       </div>
-      <p style="font-size:11px;color:var(--grey);text-align:center">Paiement sécurisé par Stripe · Annulation à tout moment</p>
+      <button class="btn-sub" onclick="choosePlan('monthly')">Payer 10 € et continuer</button>
+      <button class="btn-sub forest" style="margin-top:10px" onclick="closeModal('premium')">Annuler</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══ MODAL DOSSIER ENVOYÉ ══ -->
+<div class="overlay" id="modal-dossier-sent">
+  <div class="modal" style="max-width:520px">
+    <div class="mh forest">
+      <h2>Demande de dossier enregistrée</h2>
+      <p id="dossier-sent-ref">Réf. –</p>
+      <button class="mclose" onclick="closeModal('dossier-sent')">×</button>
+    </div>
+    <div class="mb">
+      <p id="dossier-sent-text" style="font-size:13px;color:#555;line-height:1.75;margin-bottom:14px">Votre demande a bien été prise en compte.</p>
+      <div class="disclaimer" style="margin-bottom:12px">Référence du dossier : <strong id="dossier-sent-strong-ref">—</strong><br>Après paiement, le numéro du dossier vous est confirmé par email.</div>
+      <button class="btn-sub forest" onclick="closeModal('dossier-sent')">Compris</button>
     </div>
   </div>
 </div>
@@ -1412,9 +1419,181 @@ async function submitContact() {
 // ══════════════════════════════════════════════
 window._pendingAction = null;
 
-function gateAction(e, action, ref) {
+function getPendingDossierInfo() {
+  if(window._pendingAction && window._pendingAction.action === 'dossier') {
+    return {
+      ref: window._pendingAction.ref || '',
+      titre: window._pendingAction.titre || ''
+    };
+  }
+  return { ref: '', titre: '' };
+}
+
+async function sendRegistrationEmails({ prenom, nom, email, dossierRef, dossierTitre }) {
+  const safeRef = dossierRef || 'Aucun dossier associé';
+  const safeTitre = dossierTitre || 'Création de compte générale';
+
+  const adminParams = {
+    prenom,
+    nom,
+    email,
+    telephone: 'Non renseigné',
+    qualite: 'Création de compte',
+    annonce: safeTitre,
+    ref: safeRef,
+    message: `Nouveau compte créé${dossierRef ? ` depuis la demande du dossier ${safeRef}` : ''}.`,
+    to_email: 'cabinet.feldman@gmail.com'
+  };
+
+  const userParams = {
+    prenom,
+    nom,
+    email,
+    telephone: 'Support : cabinet.feldman@gmail.com',
+    qualite: 'Confirmation de création de compte',
+    annonce: safeTitre,
+    ref: safeRef,
+    message: dossierRef
+      ? `Votre compte a bien été créé. Votre demande pour le dossier ${safeRef} a été enregistrée. Nous vous envoyons le dossier sous 3 jours ouvrés.`
+      : 'Votre compte a bien été créé sur Liquidation-Feldman.',
+    to_email: email
+  };
+
+  const results = await Promise.allSettled([
+    emailjs.send('service_hdaiied', 'template_fnj8snk', adminParams, 'TioikOEWpu0GC1I4C'),
+    emailjs.send('service_hdaiied', 'template_ydvxwyn', userParams, 'TioikOEWpu0GC1I4C')
+  ]);
+
+  const failures = results.filter(r => r.status === 'rejected');
+  if(failures.length) console.error('EmailJS registration error:', failures);
+  return failures.length === 0;
+}
+
+function getDossierClickCount() {
+  return parseInt(localStorage.getItem('lf_dossier_click_count') || '0', 10) || 0;
+}
+
+function setDossierClickCount(value) {
+  localStorage.setItem('lf_dossier_click_count', String(value));
+}
+
+function setPendingPaidDossier(ref, titre) {
+  const payload = {
+    ref: ref || '',
+    titre: titre || '',
+    email: window.currentUser?.email || '',
+    prenom: window.currentUserData?.prenom || '',
+    nom: window.currentUserData?.nom || '',
+    createdAt: new Date().toISOString()
+  };
+  localStorage.setItem('lf_paid_dossier_pending', JSON.stringify(payload));
+}
+
+function getPendingPaidDossier() {
+  try {
+    return JSON.parse(localStorage.getItem('lf_paid_dossier_pending') || 'null');
+  } catch(e) {
+    return null;
+  }
+}
+
+function clearPendingPaidDossier() {
+  localStorage.removeItem('lf_paid_dossier_pending');
+}
+
+async function sendPaidDossierEmails(payload) {
+  if(!payload || !payload.ref) return false;
+
+  const email = payload.email || window.currentUser?.email || '';
+  const prenom = payload.prenom || window.currentUserData?.prenom || '';
+  const nom = payload.nom || window.currentUserData?.nom || '';
+  const titre = payload.titre || payload.ref;
+
+  const adminParams = {
+    prenom,
+    nom,
+    email,
+    telephone: 'Paiement Stripe',
+    qualite: 'Dossier payé',
+    annonce: titre,
+    ref: payload.ref,
+    message: `Paiement confirmé pour le dossier ${payload.ref}. Merci d'envoyer le dossier demandé au client.`,
+    to_email: 'cabinet.feldman@gmail.com'
+  };
+
+  const userParams = {
+    prenom,
+    nom,
+    email,
+    telephone: 'Support : cabinet.feldman@gmail.com',
+    qualite: 'Confirmation de paiement',
+    annonce: titre,
+    ref: payload.ref,
+    message: `Paiement confirmé pour le dossier ${payload.ref}. Nous vous adressons le dossier demandé dans les meilleurs délais.`,
+    to_email: email
+  };
+
+  const jobs = [
+    emailjs.send('service_hdaiied', 'template_fnj8snk', adminParams, 'TioikOEWpu0GC1I4C')
+  ];
+
+  if(email) {
+    jobs.push(emailjs.send('service_hdaiied', 'template_ydvxwyn', userParams, 'TioikOEWpu0GC1I4C'));
+  }
+
+  const results = await Promise.allSettled(jobs);
+  const failures = results.filter(r => r.status === 'rejected');
+  if(failures.length) console.error('EmailJS paid dossier error:', failures);
+  return failures.length === 0;
+}
+
+async function processStripeReturn() {
+  if(window._stripeReturnHandled) return;
+  const params = new URLSearchParams(window.location.search);
+  const paid = params.get('stripe_paid') === '1' || params.get('payment') === 'success';
+  if(!paid) return;
+
+  const payload = getPendingPaidDossier();
+  if(!payload || !payload.ref) return;
+
+  window._stripeReturnHandled = true;
+  const dedupeKey = `lf_paid_mail_sent_${payload.ref}_${payload.createdAt || ''}`;
+  if(localStorage.getItem(dedupeKey)) return;
+
+  const ok = await sendPaidDossierEmails(payload);
+  if(ok) localStorage.setItem(dedupeKey, '1');
+
+  const sentRef = document.getElementById('dossier-sent-ref');
+  const sentStrongRef = document.getElementById('dossier-sent-strong-ref');
+  const sentText = document.getElementById('dossier-sent-text');
+  if(sentRef) sentRef.textContent = `Réf. ${payload.ref}`;
+  if(sentStrongRef) sentStrongRef.textContent = payload.ref;
+  if(sentText) sentText.textContent = `Paiement confirmé pour le dossier ${payload.ref}. Le numéro du dossier a bien été envoyé après paiement.`;
+  openModal('dossier-sent');
+
+  clearPendingPaidDossier();
+  const cleanUrl = window.location.pathname + window.location.hash;
+  window.history.replaceState({}, document.title, cleanUrl);
+}
+
+function showDossierThankYou(ref, titre) {
+  const refText = ref || '—';
+  const sentRef = document.getElementById('dossier-sent-ref');
+  const sentStrongRef = document.getElementById('dossier-sent-strong-ref');
+  const sentText = document.getElementById('dossier-sent-text');
+
+  if(sentRef) sentRef.textContent = `Réf. ${refText}`;
+  if(sentStrongRef) sentStrongRef.textContent = refText;
+  if(sentText) sentText.textContent = ref
+    ? `Merci d'avoir créé votre compte. Nous vous envoyons le dossier ${ref} sous 3 jours ouvrés.`
+    : "Merci d'avoir créé votre compte. Nous vous envoyons le dossier sous 3 jours ouvrés.";
+
+  openModal('dossier-sent');
+}
+
+function gateAction(e, action, ref, titreOverride) {
   if(e) { e.preventDefault(); e.stopPropagation(); }
-  const titre = (window._offreTitres && window._offreTitres[ref]) || ref;
+  const titre = titreOverride || (window._offreTitres && window._offreTitres[ref]) || ref;
 
   if(action === 'contact') {
     if(!window.currentUser) {
@@ -1423,20 +1602,29 @@ function gateAction(e, action, ref) {
       return;
     }
     openContactModal(ref, titre);
+    return;
+  }
 
-  } else if(action === 'dossier') {
+  if(action === 'dossier') {
     window._pendingAction = { action, ref, titre };
     if(!window.currentUser) {
-      showAuthModal('register', 'Créez votre compte pour accéder aux dossiers');
+      showAuthModal('register', 'Créez votre compte pour recevoir le dossier');
       return;
     }
-    const FREE_LIMIT = 1;
-    let used = JSON.parse(localStorage.getItem('lf_free_dossiers') || '[]');
-    if(used.includes(ref) || used.length < FREE_LIMIT) {
-      if(!used.includes(ref)) { used.push(ref); localStorage.setItem('lf_free_dossiers', JSON.stringify(used)); }
-      const remaining = FREE_LIMIT - used.length;
-      showToast('📁 Dossier ouvert' + (remaining > 0 ? ' — ' + remaining + ' accès gratuit' + (remaining > 1 ? 's' : '') + ' restant' + (remaining > 1 ? 's' : '') : ' — dernier accès gratuit utilisé'));
-    } else { openModal('premium'); }
+
+    const clickCount = getDossierClickCount();
+    if(clickCount < 1) {
+      setDossierClickCount(clickCount + 1);
+      let used = JSON.parse(localStorage.getItem('lf_free_dossiers') || '[]');
+      if(!used.includes(ref)) {
+        used.push(ref);
+        localStorage.setItem('lf_free_dossiers', JSON.stringify(used));
+      }
+      showDossierThankYou(ref, titre);
+      return;
+    }
+
+    showPremiumModal(ref, titre);
   }
 }
 
@@ -1448,19 +1636,26 @@ function showAuthModal(tab, message) {
   openModal('auth');
 }
 
-// Afficher la modal premium
 function showPremiumModal(ref, titre) {
   window._pendingAction = { action: 'dossier', ref, titre };
+  const premiumRef = document.getElementById('premium-ref');
+  const premiumText = document.getElementById('premium-text');
+  if(premiumRef) premiumRef.textContent = `Réf. ${ref || '—'}`;
+  if(premiumText) premiumText.textContent = ref
+    ? `Le dossier ${ref} est accessible au tarif unitaire de 10 €.`
+    : "Le dossier demandé est accessible au tarif unitaire de 10 €.";
   openModal('premium');
 }
 
 function choosePlan(plan) {
   closeModal('premium');
+  const pending = window._pendingAction;
+  if(!pending || pending.action !== 'dossier') return;
   if(!window.currentUser) {
-    window._pendingPlan = plan;
     showAuthModal('register', 'Créez votre compte pour accéder aux dossiers');
     return;
   }
+  setPendingPaidDossier(pending.ref, pending.titre);
   startCheckout(plan);
 }
 
@@ -1471,7 +1666,7 @@ function resumePendingAction() {
   window._pendingAction = null;
   setTimeout(() => {
     if(p.action === 'contact') openContactModal(p.ref, p.titre);
-    else if(p.action === 'dossier') {       const FREE_LIMIT = 1;       let used = JSON.parse(localStorage.getItem('lf_free_dossiers') || '[]');       if(!used.includes(p.ref) && used.length < FREE_LIMIT) {         used.push(p.ref);         localStorage.setItem('lf_free_dossiers', JSON.stringify(used));         showToast('📁 Dossier ' + p.ref + ' — Vous recevrez le dossier par email sous 3 jours ouvrés');       } else { startCheckout('monthly'); }     }
+    else if(p.action === 'dossier') gateAction(null, 'dossier', p.ref, p.titre);
   }, 300);
 }
 
@@ -1491,19 +1686,19 @@ function openAuthModal(mode) {
   showAuthModal(mode || 'register');
 }
 
-
 function startCheckout(plan) {
   const links = {
     monthly: 'https://buy.stripe.com/dRmaEX3Dk8I1ajv7du3gk02',
-    yearly:  'https://buy.stripe.com/00w4gz2zg0bvcrDgO43gk00'
+    yearly: 'https://buy.stripe.com/00w4gz2zg0bvcrDgO43gk00'
   };
-  window.location.href = links[plan];
+  window.location.href = links[plan] || links.monthly;
 }
 
 
 
 // ══ INIT ══
 emailjs.init('TioikOEWpu0GC1I4C');
+window.addEventListener('load', processStripeReturn);
 
 // Charger les offres depuis Google Sheets
 (async () => {
